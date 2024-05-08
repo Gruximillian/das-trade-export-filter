@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAS Trade Exports Filter</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js" type="application/javascript" defer></script>
+</head>
+<body>
+  <main>
+    <h1 class="title">DAS Trade Exports Filter</h1>
+    <form id="csv-loader">
+      <input type="file" id="csv-file-input" accept=".csv" />
+      <br />
+      <input type="submit" value="Submit" />
+    </form>
+
+    <section id="filter">
+      <label>
+        <span>Select column</span>
+        <select id="column-select">
+        </select>
+      </label>
+
+      <label>
+        <span>Select value</span>
+        <select id="value-select">
+        </select>
+      </label>
+    </section>
+  </main>
+</body>
+</html>
