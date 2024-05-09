@@ -42,7 +42,7 @@ window.addEventListener('load', () => {
           return trade[column];
         }, '');
 
-        return `${result}${dataRow},\r\n`;
+        return `${result}${dataRow},\n`;
       }, firstLine);
 
       const filterInfo = Object.entries(filterOptions)
