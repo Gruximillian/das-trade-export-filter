@@ -13,13 +13,20 @@
     <h1 class="title">DAS Trade Exports Filter</h1>
     <section class="input-form">
       <form id="csv-loader">
-        <input type="file" id="csv-file-input" accept=".csv" />
+        <label class="file-select">
+          <span>Choose file</span>
+          <span id="csv-file-name">No file selected</span>
+          <input type="file" id="csv-file-input" accept=".csv" />
+        </label>
         <br />
-        <input type="submit" value="Submit" />
+        <input class="file-submit" type="submit" value="Submit" />
       </form>
     </section>
 
-    <section id="filter-options" class="filter-options"></section>
+    <section class="filter-options-container">
+      <p id="filters-section-title"></p>
+      <div id="filters" class="filter-options"></div>
+    </section>
 
     <section id="data-download"></section>
 

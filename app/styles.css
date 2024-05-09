@@ -1,14 +1,91 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .title {
-  font-size: 24px;
+  font-size: 36px;
   font-style: italic;
+  text-align: center;
+}
+
+.input-form {
+  margin: 50px 0;
+}
+
+.file-select {
+  margin-bottom: 10px;
+  display: inline-block;
+  border: none;
+}
+
+.file-select > span:first-child,
+.file-submit,
+.download-button {
+  display: inline-block;
+  background-color: aqua;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-radius: 5px;
+  box-shadow: 0 1px 6px 0 black;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  color: black;
+}
+
+.file-select > span:first-child:hover,
+.file-submit:hover,
+.download-button:hover {
+  opacity: 0.8;
+}
+
+.file-select > input {
+  display: none;
+}
+
+.filter-options-container {
+  margin: 50px 20px;
+}
+
+.filter-options-container p {
+  font-size: 30px;
+}
+
+.filter-options {
+  display: flex;
+}
+
+.filter-options p {
+  font-size: 20px;
+}
+
+.filter-options > fieldset {
+  width: 50%;
+}
+
+.filter-content {
+  display: flex;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.filter-content label {
+  min-width: 110px;
+  margin: 10px;
 }
 
 .data-display {
   border-radius: 10px;
-  margin: 20px auto;
-  max-width: 1200px;
+  margin: 30px auto;
   overflow: hidden;
-  box-shadow: 0px 1px 6px 0px black;
+  box-shadow: 0 1px 6px 0 black;
 }
 
 .data-table {

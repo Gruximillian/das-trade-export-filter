@@ -1,7 +1,9 @@
 window.addEventListener('load', () => {
   const form = document.getElementById('csv-loader');
   const fileInput = document.getElementById('csv-file-input');
-  const filterOptionsContainer = document.getElementById('filter-options');
+  const fileNameContainer = document.getElementById('csv-file-name');
+  const filterContainerTitle = document.getElementById('filters-section-title');
+  const filters = document.getElementById('filters');
   const tableHeader = document.getElementById('data-table-header');
   const tableBody = document.getElementById('data-table-body');
   const dataDownloadContainer = document.getElementById('data-download');
@@ -78,12 +80,13 @@ window.addEventListener('load', () => {
     displayData(data);
   };
 
-  filterOptionsContainer.addEventListener('click', filterIsUpdated);
+  filters.addEventListener('click', filterIsUpdated);
 
   const clear = () => {
     tableHeader.innerHTML = null;
     tableBody.innerHTML = null;
-    filterOptionsContainer.innerHTML = null;
+    filters.innerHTML = null;
+    filterContainerTitle.innerText = '';
     filterBy.forEach(filter => filterOptions[filter] = []);
   };
 
@@ -181,9 +184,14 @@ window.addEventListener('load', () => {
 
     const button = document.createElement('a');
     button.innerText = 'Download .csv file';
+    button.classList.add('download-button');
 
     dataDownloadContainer.appendChild(button);
   };
+
+  fileInput.addEventListener('change', () => {
+    fileNameContainer.innerText = fileInput.value;
+  });
 
   reader.addEventListener('load', (e) => {
     clear();
@@ -200,9 +208,10 @@ window.addEventListener('load', () => {
 
     trades = getTrades(columns, linesWithData);
 
+    filterContainerTitle.innerText = 'Filters';
     filterBy.forEach(filter => {
       const options = columns.includes(filter) && getValuesFor(filter, trades);
-      filterOptionsContainer.appendChild(addFilter(filter, options));
+      filters.appendChild(addFilter(filter, options));
     });
 
     displayData(trades);
