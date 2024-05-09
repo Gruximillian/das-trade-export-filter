@@ -26,8 +26,33 @@ window.addEventListener('load', () => {
   });
 
   const downloadDataHandler = (e) => {
-    if (e.target.tagName === 'BUTTON') {
-      console.log(JSON.stringify(getFilteredData(), null, 2));
+    if (e.target.tagName === 'A') {
+      const data = getFilteredData();
+      const columns = Object.keys(data[0]);
+      const firstLine = `${columns.join(',')},\n`;
+
+      const output = data.reduce((result, trade) => {
+        const dataRow = columns.reduce((row, column) => {
+          if (row) {
+            return `${row},${trade[column]}`;
+          }
+
+          return trade[column];
+        }, '');
+
+        return `${result}${dataRow},\r\n`;
+      }, firstLine);
+
+      const filterInfo = Object.entries(filterOptions)
+        .map(([ key, value ]) => value.length > 0 ? `${key}_${value.join('+')}` : '')
+        .filter(Boolean);
+
+      const filterInfoString = filterInfo.length > 1 ? filterInfo.join('&') : filterInfo[0];
+
+      const blob = new Blob([output], { type: 'text/csv;charset=utf-8,' });
+      const dataUrl = URL.createObjectURL(blob);
+      e.target.setAttribute('href', dataUrl);
+      e.target.setAttribute('download', `Trades_${filterInfoString}.csv`);
     }
   };
 
@@ -138,7 +163,7 @@ window.addEventListener('load', () => {
 
   const getTrades = (columns, data) => {
     return data.slice(1).map(trade => {
-      const tradeValues = trade.slice(0, -1).split(',');
+      const tradeValues = trade.split(',');
       const tradeObject = {};
 
       columns.forEach((column, index) => {
@@ -152,7 +177,7 @@ window.addEventListener('load', () => {
   const addDataDownloadButton = () => {
     dataDownloadContainer.innerHTML = null;
 
-    const button = document.createElement('button');
+    const button = document.createElement('a');
     button.innerText = 'Download .csv file';
 
     dataDownloadContainer.appendChild(button);
@@ -162,14 +187,16 @@ window.addEventListener('load', () => {
     clear();
 
     const content = e.target.result;
-    const lines = content.split('\r\n').slice(0, -1); // TODO: Maybe do a safer check if this is an empty line at the end of file
-    const headerLine = lines[0].endsWith(',') && lines[0].slice(0, -1) || lines[0];
+    const separator = content.includes('\r\n') ? ',\r\n' : ',\n';
+    const allLines = content.split(separator);
+    const linesWithData = allLines[allLines.length - 1] === '' ? allLines.slice(0, -1) : allLines;
+    const headerLine = linesWithData[0];
     const columns = headerLine.split(',');
     const tableHeaderRow = createTableRow(columns, 'th');
 
     tableHeader.appendChild(tableHeaderRow);
 
-    trades = getTrades(columns, lines);
+    trades = getTrades(columns, linesWithData);
 
     filterBy.forEach(filter => {
       const options = columns.includes(filter) && getValuesFor(filter, trades);
