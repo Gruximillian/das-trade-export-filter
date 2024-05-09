@@ -95,6 +95,8 @@ window.addEventListener('load', () => {
       row.appendChild(cell);
     });
 
+    row.style.gridTemplateColumns = `repeat(${values.length}, 1fr)`;
+
     return row;
   };
 
