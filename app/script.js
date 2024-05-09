@@ -2,12 +2,12 @@ window.addEventListener('load', () => {
   const form = document.getElementById('csv-loader');
   const fileInput = document.getElementById('csv-file-input');
   const filterOptionsContainer = document.getElementById('filter-options');
-  // const columnSelector = document.getElementById('column-select');
-  // const valueSelector = document.getElementById('value-select');
   const tableHeader = document.getElementById('data-table-header');
   const tableBody = document.getElementById('data-table-body');
+  const dataDownloadContainer = document.getElementById('data-download');
 
   const filterBy = ['Account', 'Symbol'];
+  let trades = [];
 
   const createFilterOptions = (filterOptions) => {
     const filterObject = {};
@@ -25,7 +25,15 @@ window.addEventListener('load', () => {
     reader.readAsText(file);
   });
 
-  const filterUpdated = (e) => {
+  const downloadDataHandler = (e) => {
+    if (e.target.tagName === 'BUTTON') {
+      console.log(JSON.stringify(getFilteredData(), null, 2));
+    }
+  };
+
+  dataDownloadContainer.addEventListener('click', downloadDataHandler);
+
+  const filterIsUpdated = (e) => {
     const { type, name, value, checked } = e.target;
 
     if (type !== 'checkbox') {
@@ -40,10 +48,12 @@ window.addEventListener('load', () => {
       const indexOfValue = filterOption.indexOf(value);
       filterOption.splice(indexOfValue, 1);
     }
-    console.log('filterOptions', JSON.stringify(filterOptions, null, 2));
+
+    const data = getFilteredData();
+    displayData(data);
   };
 
-  filterOptionsContainer.addEventListener('click', filterUpdated);
+  filterOptionsContainer.addEventListener('click', filterIsUpdated);
 
   const clear = () => {
     tableHeader.innerHTML = null;
@@ -63,58 +73,27 @@ window.addEventListener('load', () => {
     return row;
   };
 
-  // const optionCreator = (value) => {
-  //   const option = document.createElement('option');
-  //   option.value = value;
-  //   option.innerText = value;
-  //   option.selected = value.toLowerCase() === 'account';
-  //   return option;
-  // };
-  //
-  // const generateOptions = (parent, options) => {
-  //   options.forEach((option) => {
-  //     parent.appendChild(optionCreator(option));
-  //   });
-  // };
-  //
-  // const generateValueOptions = (columnName) => {
-  //   const columnValues = trades.reduce((result, trade) => {
-  //     const value = trade[columnName];
-  //     if (!result.includes(value)) {
-  //       result.push(value);
-  //     }
-  //
-  //     return result;
-  //   }, []);
-  //
-  //   valueSelector.innerHTML = null;
-  //   generateOptions(valueSelector, columnValues);
-  // };
-  //
-  // const filterData = (trades) => {
-  //   const columnName = columnSelector.value;
-  //   const columnValue = valueSelector.value;
-  //
-  //   return trades.filter(trade => trade[columnName] === columnValue);
-  // }
-  //
-  // const displayData = (trades) => {
-  //   const data = filterData(trades);
-  //   tableBody.innerHTML = null;
-  //
-  //   data.forEach(trade => {
-  //     const values = Object.values(trade);
-  //     const row = createTableRow(values, 'td');
-  //     tableBody.appendChild(row);
-  //   });
-  //
-  //   // TODO: Make a csv string and export into a .csv file
-  // };
-  //
-  // columnSelector.addEventListener('change', (e) => {
-  //   const columnName = e.target.value;
-  //   generateValueOptions(columnName);
-  // });
+  const getFilteredData = () => {
+    const filteringBy = filterBy.filter(prop => filterOptions[prop].length > 0);
+
+    return trades.filter(trade => {
+      return filteringBy.every(prop => {
+        return filterOptions[prop].includes(trade[prop]);
+      });
+    });
+  }
+
+  const displayData = (data) => {
+    tableBody.innerHTML = null;
+
+    data.forEach(trade => {
+      const values = Object.values(trade);
+      const row = createTableRow(values, 'td');
+      tableBody.appendChild(row);
+    });
+
+    addDataDownloadButton(data);
+  };
 
   const getValuesFor = (columnName, trades) => {
     return trades.reduce((result, trade) => {
@@ -170,6 +149,15 @@ window.addEventListener('load', () => {
     });
   };
 
+  const addDataDownloadButton = () => {
+    dataDownloadContainer.innerHTML = null;
+
+    const button = document.createElement('button');
+    button.innerText = 'Download .csv file';
+
+    dataDownloadContainer.appendChild(button);
+  };
+
   reader.addEventListener('load', (e) => {
     clear();
 
@@ -181,16 +169,13 @@ window.addEventListener('load', () => {
 
     tableHeader.appendChild(tableHeaderRow);
 
-    const trades = getTrades(columns, lines);
+    trades = getTrades(columns, lines);
 
-    // generateOptions(columnSelector, columns);
-    // generateValueOptions(columnSelector.value);
-    // displayData(trades);
     filterBy.forEach(filter => {
       const options = columns.includes(filter) && getValuesFor(filter, trades);
       filterOptionsContainer.appendChild(addFilter(filter, options));
     });
-  });
 
-  // [columnSelector, valueSelector].forEach(selector => selector.addEventListener('change', displayData));
+    displayData(trades);
+  });
 });
