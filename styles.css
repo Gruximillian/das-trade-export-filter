@@ -3,9 +3,21 @@
   font-family: Arial, sans-serif;
 }
 
+html, body, main {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+}
+
 main {
   max-width: 1200px;
   margin: 0 auto;
+  border: 1px solid transparent;
+  position: relative;
+  padding-bottom: 50px;
 }
 
 .title {
@@ -129,19 +141,30 @@ main {
   background-color: lightgrey;
 }
 
-.icons8 {
+footer {
   position: absolute;
-  font-size: 10px;
+  bottom: 0;
+  width: 100%;
+  max-width: 1200px;
+  height: 20px;
+  font-size: 14px;
   color: grey;
-  right: 10px;
-  bottom: 10px;
 }
 
-.icons8 a {
+footer span {
+  display: inline-block;
+  position: absolute;
+}
+
+footer a {
   text-decoration: none;
   color: inherit;
 }
 
-.icons8 a:hover {
+footer a:hover {
   text-decoration: underline;
+}
+
+footer .right {
+  right: 0;
 }
