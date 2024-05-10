@@ -128,3 +128,20 @@ main {
 .data-table tbody tr:nth-child(even) {
   background-color: lightgrey;
 }
+
+.icons8 {
+  position: absolute;
+  font-size: 10px;
+  color: grey;
+  right: 10px;
+  bottom: 10px;
+}
+
+.icons8 a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.icons8 a:hover {
+  text-decoration: underline;
+}
