@@ -167,7 +167,8 @@ window.addEventListener('load', () => {
   };
 
   const getTrades = (columns, data) => {
-    return data.slice(1).map(trade => {
+    // Using a Set to filter out the duplicates. It happens to some people to get them in their exported file
+    return [...new Set(data.slice(1))].map(trade => {
       const tradeValues = trade.split(',');
       const tradeObject = {};
 
@@ -199,7 +200,7 @@ window.addEventListener('load', () => {
     const content = e.target.result;
     const separator = content.includes('\r\n') ? ',\r\n' : ',\n';
     const allLines = content.split(separator);
-    const linesWithData = allLines[allLines.length - 1] === '' ? allLines.slice(0, -1) : allLines;
+    const linesWithData = allLines[allLines.length - 1] === '' ? allLines.slice(0, -1) : allLines; // Last line tends to be empty line
     const headerLine = linesWithData[0];
     const columns = headerLine.split(',');
     const tableHeaderRow = createTableRow(columns, 'th');
