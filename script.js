@@ -8,6 +8,8 @@ window.addEventListener('load', () => {
   const tableBody = document.getElementById('data-table-body');
   const dataDownloadContainer = document.getElementById('data-download');
 
+  let fileType;
+
   const filterBy = ['Account', 'Symbol'];
   let trades = [];
 
@@ -24,6 +26,7 @@ window.addEventListener('load', () => {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const file = fileInput.files[0];
+    fileType = file.name.split('.')[1];
     reader.readAsText(file);
   });
 
@@ -168,7 +171,7 @@ window.addEventListener('load', () => {
 
   const getTrades = (columns, data) => {
     // Using a Set to filter out the duplicates. It happens to some people to get them in their exported file
-    return [...new Set(data.slice(1))].map(trade => {
+    return [...new Set(data)].map(trade => {
       const tradeValues = trade.split(',');
       const tradeObject = {};
 
@@ -198,16 +201,35 @@ window.addEventListener('load', () => {
     clear();
 
     const content = e.target.result;
-    const separator = content.includes('\r\n') ? ',\r\n' : ',\n';
+    const newLineCharacter = content.includes('\r\n') ? '\r\n' : '\n';
+    const separator = fileType === 'csv' ? `,${newLineCharacter}` : newLineCharacter;
     const allLines = content.split(separator);
     const linesWithData = allLines[allLines.length - 1] === '' ? allLines.slice(0, -1) : allLines; // Last line tends to be empty line
-    const headerLine = linesWithData[0];
-    const columns = headerLine.split(',');
-    const tableHeaderRow = createTableRow(columns, 'th');
+    const firstLine = linesWithData[0];
+    const lastLine = linesWithData[linesWithData.length - 1];
+    const isLogFile = firstLine.toUpperCase().includes('LOG,SYSTEM START UP') && lastLine.toUpperCase().includes('LOG,SYSTEM SHUT DOWN!');
+    let logContent;
 
+    if (isLogFile) {
+      logContent = linesWithData
+        .filter(line => line.toUpperCase().includes('TRADELOG,EXECUTE,'))
+        .map(line => line
+          .toUpperCase()
+          .split('TRADELOG,EXECUTE,')[1]
+          .split(',,')[0]
+          .replace('SHRT', 'SS')
+          .replace('SELL', 'S')
+          .replace('BUY', 'B')
+        );
+    }
+
+    const columns = isLogFile ? ['Side', 'Symbol', 'Qty', 'Price', 'Route', 'Time', 'Account', 'Type', 'Broker', 'Cloid'] : firstLine.split(',');
+    const tableHeaderRow = createTableRow(columns, 'th');
     tableHeader.appendChild(tableHeaderRow);
 
-    trades = getTrades(columns, linesWithData);
+    const logData = isLogFile ? logContent : linesWithData.slice(1);
+
+    trades = getTrades(columns, logData);
 
     filterContainerTitle.innerText = 'Filters';
     filterBy.forEach(filter => {
