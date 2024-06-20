@@ -7,6 +7,7 @@ window.addEventListener('load', () => {
   const tableHeader = document.getElementById('data-table-header');
   const tableBody = document.getElementById('data-table-body');
   const dataDownloadContainer = document.getElementById('data-download');
+  const manualColumns = ['Side', 'Symbol', 'Qty', 'Price', 'Route', 'Time', 'Account', 'Broker', 'Type', 'Cloid'];
 
   let fileType;
 
@@ -197,6 +198,29 @@ window.addEventListener('load', () => {
     fileNameContainer.innerText = fileInput.value;
   });
 
+  const processLogFile = (dataLines) => {
+    // Examples of DAS trade log lines:
+    // 10:11:30,TradeLog,Execute,Shrt,PYPL,80,59.45,SMAT,10:11:30,TRPCT1027,,L,Oid:3879
+    // 10:31:43,TradeLog,Execute,Buy,PYPL,80,59.43,SMAT,10:31:43,TRPCT1027,,M,Oid:4404
+    // Columns starting after the 'Execute' part and ending after the empty field (Broker field, I assume): ['Side', 'Symbol', 'Qty', 'Price', 'Route', 'Time', 'Account', 'Broker']
+
+    return dataLines
+      .map(line => line.toUpperCase()) // Making sure that no change of letter casing in the future breaks the filter
+      .filter(line => line.includes('TRADELOG,EXECUTE,'))
+      .map(line => {
+        const type = line.includes('SHRT') && 'Short' || 'Margin';
+        const processedLine = line
+          .split('TRADELOG,EXECUTE,')[1]
+          .split(',M,OID')[0]
+          .split(',L,OID')[0]
+          .replace('SHRT', 'SS')
+          .replace('SELL', 'S')
+          .replace('BUY', 'B');
+
+        return `${processedLine},${type},AUTO`
+      });
+  };
+
   reader.addEventListener('load', (e) => {
     clear();
 
@@ -206,29 +230,12 @@ window.addEventListener('load', () => {
     const allLines = content.split(separator);
     const linesWithData = allLines[allLines.length - 1] === '' ? allLines.slice(0, -1) : allLines; // Last line tends to be empty line
     const firstLine = linesWithData[0];
-    const lastLine = linesWithData[linesWithData.length - 1];
-    const isLogFile = firstLine.toUpperCase().includes('LOG,SYSTEM START UP') && lastLine.toUpperCase().includes('LOG,SYSTEM SHUT DOWN!');
-    let logContent;
-
-    if (isLogFile) {
-      logContent = linesWithData
-        .filter(line => line.toUpperCase().includes('TRADELOG,EXECUTE,'))
-        .map(line => line
-          .toUpperCase()
-          .split('TRADELOG,EXECUTE,')[1]
-          .split(',,')[0]
-          .replace('SHRT', 'SS')
-          .replace('SELL', 'S')
-          .replace('BUY', 'B')
-        );
-    }
-
-    const columns = isLogFile ? ['Side', 'Symbol', 'Qty', 'Price', 'Route', 'Time', 'Account', 'Type', 'Broker', 'Cloid'] : firstLine.split(',');
+    const isLogFile = firstLine.toUpperCase().includes('LOG,SYSTEM START UP');
+    const columns = isLogFile ? manualColumns : firstLine.split(',');
     const tableHeaderRow = createTableRow(columns, 'th');
+    const logData = isLogFile ? processLogFile(linesWithData) : linesWithData.slice(1);
+
     tableHeader.appendChild(tableHeaderRow);
-
-    const logData = isLogFile ? logContent : linesWithData.slice(1);
-
     trades = getTrades(columns, logData);
 
     filterContainerTitle.innerText = 'Filters';
